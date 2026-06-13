@@ -49,3 +49,34 @@ def test_donor_from_dict_empty_string_last_donation_date_becomes_none():
     assert d["last_donation_date"] == ""
     restored = Donor.from_dict(d)
     assert restored.last_donation_date is None
+
+
+from models.blood_inventory import BloodInventory
+from models.donation_record import DonationRecord
+
+
+def test_blood_inventory_expired():
+    item = BloodInventory("O+", 10, "2020-01-01")
+    assert item.is_expired() is True
+
+
+def test_blood_inventory_not_expired():
+    item = BloodInventory("A+", 5, "2099-01-01")
+    assert item.is_expired() is False
+
+
+def test_blood_inventory_roundtrip():
+    item = BloodInventory("B-", 8, "2026-12-31")
+    restored = BloodInventory.from_dict(item.to_dict())
+    assert restored.blood_group == "B-"
+    assert restored.available_units == 8
+    assert restored.expiry_date == "2026-12-31"
+
+
+def test_donation_record_roundtrip():
+    rec = DonationRecord("donor123", "2026-06-01", 2, "Patient A, Ward 3")
+    restored = DonationRecord.from_dict(rec.to_dict())
+    assert restored.donor_id == "donor123"
+    assert restored.units_donated == 2
+    assert restored.recipient_details == "Patient A, Ward 3"
+    assert restored.record_id == rec.record_id
