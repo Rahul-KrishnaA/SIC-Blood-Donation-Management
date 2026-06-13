@@ -116,3 +116,51 @@ def test_queue_all_requests_sorted_by_priority():
     q.enqueue(_make_request(1, req_id="r1"))
     all_reqs = q.all_requests()
     assert all_reqs[0].priority == 1
+
+
+from models.donation_record import DonationRecord
+from data_structures.donation_stack import DonationStack
+
+
+def _make_record(donor_id, date_str, units=1):
+    return DonationRecord(donor_id, date_str, units, "Patient X")
+
+
+def test_stack_push_pop_lifo():
+    stack = DonationStack()
+    r1 = _make_record("d1", "2026-01-01")
+    r2 = _make_record("d2", "2026-06-01")
+    stack.push(r1)
+    stack.push(r2)
+    assert stack.pop().donation_date == "2026-06-01"
+    assert stack.pop().donation_date == "2026-01-01"
+
+
+def test_stack_pop_empty_raises():
+    stack = DonationStack()
+    with pytest.raises(IndexError):
+        stack.pop()
+
+
+def test_stack_all_records_most_recent_first():
+    stack = DonationStack()
+    stack.push(_make_record("d1", "2026-01-01"))
+    stack.push(_make_record("d2", "2026-06-01"))
+    records = stack.all_records()
+    assert records[0].donation_date == "2026-06-01"
+    assert records[1].donation_date == "2026-01-01"
+
+
+def test_stack_size_and_is_empty():
+    stack = DonationStack()
+    assert stack.is_empty() is True
+    stack.push(_make_record("d1", "2026-01-01"))
+    assert stack.size() == 1
+    assert stack.is_empty() is False
+
+
+def test_stack_load_records():
+    stack = DonationStack()
+    records = [_make_record("d1", "2026-01-01"), _make_record("d2", "2026-03-01")]
+    stack.load_records(records)
+    assert stack.size() == 2
