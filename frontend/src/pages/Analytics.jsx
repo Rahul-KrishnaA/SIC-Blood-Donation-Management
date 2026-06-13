@@ -70,15 +70,15 @@ export default function Analytics() {
           <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Monthly Donation Trend</p>
           <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>Units donated over time</p>
           <ResponsiveContainer width="100%" height={230}>
-            <AreaChart data={monthlyData}>
+            <AreaChart data={monthlyData} margin={{ top: 5, right: 10, bottom: 20, left: 10 }}>
               <defs>
                 <linearGradient id="mg" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor="#e53e3e" stopOpacity={0.35} />
                   <stop offset="95%" stopColor="#e53e3e" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="month" tick={{ fill: '#8892a4', fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#8892a4', fontSize: 10 }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="month" tick={{ fill: '#8892a4', fontSize: 10 }} axisLine={{ stroke: '#3d4a5a' }} tickLine={{ stroke: '#3d4a5a' }} label={{ value: 'Month', position: 'insideBottom', offset: -10, fill: '#8892a4', fontSize: 11 }} />
+              <YAxis tick={{ fill: '#8892a4', fontSize: 10 }} axisLine={{ stroke: '#3d4a5a' }} tickLine={{ stroke: '#3d4a5a' }} width={52} label={{ value: 'Units Donated', angle: -90, position: 'insideLeft', offset: 12, fill: '#8892a4', fontSize: 11 }} />
               <Tooltip {...tooltipStyle} />
               <Area type="monotone" dataKey="units" stroke="#e53e3e" strokeWidth={2} fill="url(#mg)" />
             </AreaChart>
@@ -108,9 +108,9 @@ export default function Analytics() {
           <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Inventory Status</p>
           <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>Available units per blood group</p>
           <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={invData} barSize={56}>
-              <XAxis dataKey="name" tick={{ fill: '#8892a4', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#8892a4', fontSize: 11 }} axisLine={false} tickLine={false} />
+            <BarChart data={invData} barSize={56} margin={{ top: 5, right: 10, bottom: 20, left: 10 }}>
+              <XAxis dataKey="name" tick={{ fill: '#8892a4', fontSize: 11 }} axisLine={{ stroke: '#3d4a5a' }} tickLine={{ stroke: '#3d4a5a' }} label={{ value: 'Blood Group', position: 'insideBottom', offset: -10, fill: '#8892a4', fontSize: 11 }} />
+              <YAxis tick={{ fill: '#8892a4', fontSize: 11 }} axisLine={{ stroke: '#3d4a5a' }} tickLine={{ stroke: '#3d4a5a' }} width={52} label={{ value: 'Units Available', angle: -90, position: 'insideLeft', offset: 12, fill: '#8892a4', fontSize: 11 }} />
               <Tooltip {...tooltipStyle} />
               <Bar dataKey="units" radius={[4, 4, 0, 0]}>
                 {invData.map((entry, i) => (

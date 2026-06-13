@@ -93,15 +93,15 @@ export default function Overview({ username = 'User' }) {
           <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Monthly Donations</p>
           <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>Units donated per month</p>
           <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={monthlyData}>
+            <AreaChart data={monthlyData} margin={{ top: 5, right: 10, bottom: 20, left: 10 }}>
               <defs>
                 <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#e53e3e" stopOpacity={0.3} />
                   <stop offset="95%" stopColor="#e53e3e" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="month" tick={{ fill: '#8892a4', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#8892a4', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="month" tick={{ fill: '#8892a4', fontSize: 11 }} axisLine={{ stroke: '#3d4a5a' }} tickLine={{ stroke: '#3d4a5a' }} label={{ value: 'Month', position: 'insideBottom', offset: -10, fill: '#8892a4', fontSize: 11 }} />
+              <YAxis tick={{ fill: '#8892a4', fontSize: 11 }} axisLine={{ stroke: '#3d4a5a' }} tickLine={{ stroke: '#3d4a5a' }} width={52} label={{ value: 'Units Donated', angle: -90, position: 'insideLeft', offset: 12, fill: '#8892a4', fontSize: 11 }} />
               <Tooltip contentStyle={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }} labelStyle={{ color: '#fff', fontWeight: 600 }} itemStyle={{ color: '#e2e8f0' }} />
               <Area type="monotone" dataKey="units" stroke="#e53e3e" strokeWidth={2} fill="url(#areaGrad)" />
             </AreaChart>

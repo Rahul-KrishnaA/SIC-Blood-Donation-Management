@@ -75,9 +75,9 @@ export default function Inventory() {
           <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Units by Blood Group</p>
           <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>Green = valid, Red = expired</p>
           <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={chartData} barSize={56}>
-              <XAxis dataKey="name" tick={{ fill: '#8892a4', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#8892a4', fontSize: 11 }} axisLine={false} tickLine={false} />
+            <BarChart data={chartData} barSize={56} margin={{ top: 5, right: 10, bottom: 20, left: 10 }}>
+              <XAxis dataKey="name" tick={{ fill: '#8892a4', fontSize: 11 }} axisLine={{ stroke: '#3d4a5a' }} tickLine={{ stroke: '#3d4a5a' }} label={{ value: 'Blood Group', position: 'insideBottom', offset: -10, fill: '#8892a4', fontSize: 11 }} />
+              <YAxis tick={{ fill: '#8892a4', fontSize: 11 }} axisLine={{ stroke: '#3d4a5a' }} tickLine={{ stroke: '#3d4a5a' }} width={52} label={{ value: 'Units Available', angle: -90, position: 'insideLeft', offset: 12, fill: '#8892a4', fontSize: 11 }} />
               <Tooltip contentStyle={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }} labelStyle={{ color: '#fff', fontWeight: 600 }} itemStyle={{ color: '#e2e8f0' }} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
               <Bar dataKey="units" radius={[4, 4, 0, 0]}>
                 {chartData.map((entry, i) => (
