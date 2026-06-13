@@ -112,3 +112,47 @@ def test_get_valid_inventory_excludes_expired(inv_svc):
     groups = {i.blood_group for i in valid}
     assert "A+" not in groups
     assert "B+" in groups
+
+
+from services.emergency_service import EmergencyService
+
+
+@pytest.fixture
+def emergency_svc(tmp_path, monkeypatch):
+    monkeypatch.setattr(json_handler, "INVENTORY_FILE", str(tmp_path / "inventory.json"))
+    inv = InventoryService()
+    inv.add_units("O-", 10, "2099-01-01")
+    return EmergencyService(inv)
+
+
+def test_submit_request_adds_to_queue(emergency_svc):
+    emergency_svc.submit_request("O-", 2, "City Hospital", "9999", priority=1)
+    assert emergency_svc.queue_size() == 1
+
+
+def test_process_next_fulfills_request(emergency_svc):
+    emergency_svc.submit_request("O-", 3, "City Hospital", "9999", priority=1)
+    req, fulfilled = emergency_svc.process_next()
+    assert fulfilled is True
+    assert req.blood_group == "O-"
+
+
+def test_process_next_fails_when_insufficient(tmp_path, monkeypatch):
+    monkeypatch.setattr(json_handler, "INVENTORY_FILE", str(tmp_path / "inventory2.json"))
+    inv = InventoryService()
+    inv.add_units("B+", 1, "2099-01-01")
+    svc = EmergencyService(inv)
+    svc.submit_request("B+", 5, "Hospital", "000", priority=1)
+    _, fulfilled = svc.process_next()
+    assert fulfilled is False
+
+
+def test_process_next_respects_priority_order(tmp_path, monkeypatch):
+    monkeypatch.setattr(json_handler, "INVENTORY_FILE", str(tmp_path / "inventory3.json"))
+    inv = InventoryService()
+    inv.add_units("A+", 20, "2099-01-01")
+    svc = EmergencyService(inv)
+    svc.submit_request("A+", 1, "Low", "000", priority=3)
+    svc.submit_request("A+", 1, "Critical", "111", priority=1)
+    req, _ = svc.process_next()
+    assert req.hospital == "Critical"
