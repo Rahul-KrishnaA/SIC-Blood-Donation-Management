@@ -36,3 +36,16 @@ def test_donor_blood_group_normalized_to_uppercase():
 def test_donor_city_normalized_to_lowercase():
     donor = Donor("Frank", 40, "B-", "KOLKATA")
     assert donor.city == "kolkata"
+
+
+def test_donor_to_dict_none_last_donation_date_serializes_as_empty_string():
+    donor = Donor("Grace", 30, "O+", "Pune")
+    assert donor.to_dict()["last_donation_date"] == ""
+
+
+def test_donor_from_dict_empty_string_last_donation_date_becomes_none():
+    donor = Donor("Henry", 25, "B+", "Chennai")
+    d = donor.to_dict()
+    assert d["last_donation_date"] == ""
+    restored = Donor.from_dict(d)
+    assert restored.last_donation_date is None

@@ -14,8 +14,11 @@ class Donor:
     def is_eligible(self) -> bool:
         if self.last_donation_date is None:
             return True
-        last = datetime.strptime(self.last_donation_date, "%Y-%m-%d").date()
-        return (date.today() - last).days >= 90
+        try:
+            last = datetime.strptime(self.last_donation_date, "%Y-%m-%d").date()
+            return (date.today() - last).days >= 90
+        except ValueError:
+            return False
 
     def to_dict(self) -> dict:
         return {
@@ -33,7 +36,7 @@ class Donor:
         donor.donor_id = data["donor_id"]
         donor.name = data["name"]
         donor.age = int(data["age"])
-        donor.blood_group = data["blood_group"]
-        donor.city = data["city"]
+        donor.blood_group = data["blood_group"].upper()
+        donor.city = data["city"].lower()
         donor.last_donation_date = data["last_donation_date"] or None
         return donor
