@@ -156,3 +156,43 @@ def test_process_next_respects_priority_order(tmp_path, monkeypatch):
     svc.submit_request("A+", 1, "Critical", "111", priority=1)
     req, _ = svc.process_next()
     assert req.hospital == "Critical"
+
+
+from services.history_service import HistoryService
+
+
+@pytest.fixture
+def hist_svc(tmp_path, monkeypatch):
+    monkeypatch.setattr(json_handler, "HISTORY_FILE", str(tmp_path / "donations.json"))
+    return HistoryService()
+
+
+def test_record_donation_stores_record(hist_svc):
+    rec = hist_svc.record_donation("d1", "2026-06-01", 2, "Patient A")
+    assert rec.record_id is not None
+    assert hist_svc.recent_donations(10)[0].donor_id == "d1"
+
+
+def test_recent_donations_most_recent_first(hist_svc):
+    hist_svc.record_donation("d1", "2026-01-01", 1, "P1")
+    hist_svc.record_donation("d2", "2026-06-01", 2, "P2")
+    recent = hist_svc.recent_donations(10)
+    assert recent[0].donation_date == "2026-06-01"
+
+
+def test_donor_history_filters_by_donor_id(hist_svc):
+    hist_svc.record_donation("d1", "2026-06-01", 1, "P1")
+    hist_svc.record_donation("d2", "2026-06-02", 2, "P2")
+    hist_svc.record_donation("d1", "2026-06-03", 1, "P3")
+    d1_history = hist_svc.donor_history("d1")
+    assert len(d1_history) == 2
+    assert all(r.donor_id == "d1" for r in d1_history)
+
+
+def test_monthly_summary_aggregates_units(hist_svc):
+    hist_svc.record_donation("d1", "2026-06-01", 2, "P1")
+    hist_svc.record_donation("d2", "2026-06-15", 3, "P2")
+    hist_svc.record_donation("d3", "2026-05-20", 1, "P3")
+    summary = hist_svc.monthly_summary()
+    assert summary["2026-06"] == 5
+    assert summary["2026-05"] == 1
