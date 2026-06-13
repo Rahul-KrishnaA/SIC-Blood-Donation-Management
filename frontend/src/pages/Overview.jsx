@@ -14,7 +14,7 @@ const BG_COLORS = {
   'AB+': '#48bb78', 'AB-': '#68d391', 'O+': '#4299e1', 'O-': '#63b3ed',
 }
 
-export default function Overview() {
+export default function Overview({ username = 'User' }) {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
 
@@ -55,7 +55,7 @@ export default function Overview() {
         <div>
           <p style={{ fontSize: 13, color: '#90cdf4', marginBottom: 6, fontWeight: 500 }}>Blood Donation Management</p>
           <h2 style={{ fontSize: 26, fontWeight: 700, color: '#fff', marginBottom: 10 }}>
-            Welcome back, Rahul
+            Welcome back, {username}
           </h2>
           <p style={{ fontSize: 13.5, color: '#90cdf4', maxWidth: 380, lineHeight: 1.6 }}>
             {data.eligible_donors} donors are eligible to donate today.

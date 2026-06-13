@@ -42,7 +42,7 @@ export default function App() {
     <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
       <Sidebar current={page} onNavigate={setPage} username={session.username} onLogout={handleLogout} />
       <main style={{ flex: 1, minWidth: 0, overflowY: 'auto', padding: '28px 32px', background: 'var(--bg)' }}>
-        <Page />
+        <Page username={session.username} />
       </main>
     </div>
   )
