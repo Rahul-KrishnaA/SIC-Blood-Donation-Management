@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import date
 from collections import Counter
+from streamlit_option_menu import option_menu
 
 from services.donor_service import DonorService
 from services.inventory_service import InventoryService
@@ -14,7 +15,7 @@ from analytics.dashboard import (
 
 st.set_page_config(
     page_title="SIC Blood Donation Management",
-    page_icon="🩸",
+    page_icon="assets/icon.png" if False else None,
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -23,13 +24,19 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-/* ── Sidebar ── */
+/* ── Sidebar base ── */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #F69D39 0%, #e8891e 60%, #d4750a 100%);
+    background: linear-gradient(180deg, #263238 0%, #37474f 55%, #455a64 100%);
 }
-[data-testid="stSidebar"] * { color: #fff !important; }
-[data-testid="stSidebar"] .stRadio label { font-size: 15px; font-weight: 500; }
-[data-testid="stSidebar"] hr { border-color: rgba(255,255,255,0.3); }
+[data-testid="stSidebar"] * { color: #eceff1 !important; }
+[data-testid="stSidebar"] hr { border-color: rgba(236,239,241,0.25); }
+
+/* ── option_menu overrides ── */
+.nav-link         { color: #b0bec5 !important; border-radius: 6px !important; }
+.nav-link:hover   { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
+.nav-link.active  { background: #c62828 !important; color: #fff !important; }
+.nav-link-label   { font-size: 14px; font-weight: 500; }
+.nav-link .icon   { font-size: 18px; }
 
 /* ── Metric cards ── */
 [data-testid="stMetric"] {
@@ -68,19 +75,6 @@ st.markdown("""
 /* ── Page title accent ── */
 h1 { border-bottom: 3px solid #c62828; padding-bottom: 8px; color: #1a1a1a; }
 
-/* ── Stat badge pill ── */
-.badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-}
-.badge-green  { background: #e8f5e9; color: #2e7d32; }
-.badge-red    { background: #ffebee; color: #c62828; }
-.badge-orange { background: #fff3e0; color: #e65100; }
-.badge-blue   { background: #e3f2fd; color: #1565c0; }
-
 /* ── Card container ── */
 .info-card {
     background: #fff8f8;
@@ -108,41 +102,87 @@ def _init_services():
 
 _init_services()
 
-donor_svc: DonorService        = st.session_state.donor_svc
+donor_svc: DonorService         = st.session_state.donor_svc
 inventory_svc: InventoryService = st.session_state.inventory_svc
 emergency_svc: EmergencyService = st.session_state.emergency_svc
-history_svc: HistoryService    = st.session_state.history_svc
+history_svc: HistoryService     = st.session_state.history_svc
 
 
-# ── Sidebar ───────────────────────────────────────────────────────────────────
+# ── Sidebar navigation ────────────────────────────────────────────────────────
 
-st.sidebar.markdown("## 🩸 Blood Donation\nManagement System")
-st.sidebar.markdown("---")
+with st.sidebar:
+    st.markdown(
+        "<h2 style='text-align:center; color:#eceff1; margin-bottom:4px;'>"
+        "Blood Donation</h2>"
+        "<p style='text-align:center; color:#90a4ae; font-size:13px; margin-top:0;'>"
+        "Management System</p>",
+        unsafe_allow_html=True,
+    )
+    st.markdown("---")
 
-page = st.sidebar.radio(
-    "Navigate",
-    ["🏠 Overview", "➕ Register Donor", "🔍 Donor Search",
-     "🩸 Blood Inventory", "🚨 Emergency Requests",
-     "📋 Donation History", "📊 Analytics"],
-    label_visibility="collapsed",
-)
+    page = option_menu(
+        menu_title=None,
+        options=[
+            "Overview",
+            "Register Donor",
+            "Donor Search",
+            "Blood Inventory",
+            "Emergency Requests",
+            "Donation History",
+            "Analytics",
+        ],
+        icons=[
+            "grid-1x2",
+            "person-plus",
+            "search",
+            "droplet-fill",
+            "exclamation-triangle",
+            "clock-history",
+            "bar-chart-line",
+        ],
+        default_index=0,
+        styles={
+            "container":    {"background-color": "transparent", "padding": "0"},
+            "icon":         {"color": "#b0bec5", "font-size": "16px"},
+            "nav-link":     {
+                "color": "#b0bec5",
+                "font-size": "14px",
+                "font-weight": "500",
+                "border-radius": "6px",
+                "--hover-color": "rgba(255,255,255,0.08)",
+            },
+            "nav-link-selected": {
+                "background-color": "#c62828",
+                "color": "#ffffff",
+                "font-weight": "600",
+            },
+        },
+    )
 
-# Live sidebar stats
-st.sidebar.markdown("---")
-all_donors   = donor_svc.all_donors()
-eligible_cnt = sum(1 for d in all_donors if d.is_eligible())
-total_units  = sum(i.available_units for i in inventory_svc.get_valid_inventory())
-queue_cnt    = emergency_svc.queue_size()
+    st.markdown("---")
 
-st.sidebar.markdown(f"""
-**System Status**
-- 👥 Donors: **{len(all_donors)}**
-- ✅ Eligible: **{eligible_cnt}**
-- 🩸 Blood Units: **{total_units}**
-- 🚨 Queue: **{queue_cnt}**
-""")
-st.sidebar.markdown("---")
-st.sidebar.caption("SIC Hackathon · 2026")
+    # Live stats
+    all_donors   = donor_svc.all_donors()
+    eligible_cnt = sum(1 for d in all_donors if d.is_eligible())
+    total_units  = sum(i.available_units for i in inventory_svc.get_valid_inventory())
+    queue_cnt    = emergency_svc.queue_size()
+
+    st.markdown(f"""
+<div style="font-size:13px; color:#b0bec5; line-height:2;">
+  <b style="color:#eceff1;">System Status</b><br>
+  Total Donors &nbsp;&nbsp;&nbsp; <b style="color:#fff;">{len(all_donors)}</b><br>
+  Eligible Now &nbsp;&nbsp;&nbsp; <b style="color:#fff;">{eligible_cnt}</b><br>
+  Blood Units &nbsp;&nbsp;&nbsp;&nbsp; <b style="color:#fff;">{total_units}</b><br>
+  Queue &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b style="color:{'#ef9a9a' if queue_cnt else '#fff'};">{queue_cnt}</b>
+</div>
+""", unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown(
+        "<p style='text-align:center; color:#607d8b; font-size:11px;'>"
+        "SIC Hackathon 2026</p>",
+        unsafe_allow_html=True,
+    )
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -150,61 +190,53 @@ st.sidebar.caption("SIC Hackathon · 2026")
 BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
 
 def _eligibility_badge(eligible: bool) -> str:
-    return "🟢 Eligible" if eligible else "🔴 Ineligible"
+    return "Eligible" if eligible else "Ineligible"
 
 def _priority_label(p: int) -> str:
-    return {1: "🔴 Critical", 2: "🟠 Urgent", 3: "🟢 Normal"}.get(p, str(p))
+    return {1: "Critical", 2: "Urgent", 3: "Normal"}.get(p, str(p))
 
 
 # ── Page: Overview ────────────────────────────────────────────────────────────
 
 def _page_overview():
-    st.title("🏠 Overview")
+    st.title("Overview")
     st.markdown("Real-time summary of the blood bank system.")
 
-    # Row 1 – headline metrics
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Total Donors",       len(all_donors))
-    c2.metric("Eligible to Donate", eligible_cnt)
+    c1.metric("Total Donors",          len(all_donors))
+    c2.metric("Eligible to Donate",    eligible_cnt)
     c3.metric("Blood Units Available", total_units)
-    c4.metric("Emergency Queue",    queue_cnt,
-              delta=f"{'⚠ Action needed' if queue_cnt else 'All clear'}",
+    c4.metric("Emergency Queue",       queue_cnt,
+              delta="Action needed" if queue_cnt else "All clear",
               delta_color="inverse" if queue_cnt else "off")
 
     st.markdown("---")
 
-    # Row 2 – blood group breakdown + low-stock alerts
-    col_left, col_right = st.columns([1, 1])
+    col_left, col_right = st.columns(2)
 
     with col_left:
         st.subheader("Donor Blood Group Breakdown")
         counts = Counter(d.blood_group for d in all_donors)
-        rows = []
         for bg in BLOOD_GROUPS:
             cnt = counts.get(bg, 0)
-            rows.append({"Blood Group": bg, "Donors": cnt,
-                          "Bar": cnt / max(counts.values(), default=1)})
-        for r in rows:
             col_a, col_b, col_c = st.columns([1, 1, 4])
-            col_a.markdown(f"**{r['Blood Group']}**")
-            col_b.markdown(f"{r['Donors']}")
-            col_c.progress(r["Bar"])
+            col_a.markdown(f"**{bg}**")
+            col_b.markdown(str(cnt))
+            col_c.progress(cnt / max(counts.values(), default=1))
 
     with col_right:
         st.subheader("Inventory Quick View")
         inventory = inventory_svc.get_inventory()
         max_units = max((i.available_units for i in inventory), default=1)
         for item in sorted(inventory, key=lambda x: x.available_units):
-            label  = f"{'🔴' if item.is_expired() else ('🟠' if item.available_units < 10 else '🟢')} {item.blood_group}"
-            pct    = item.available_units / max(max_units, 1)
+            status = "Expired" if item.is_expired() else ("Low" if item.available_units < 10 else "OK")
+            label  = f"{item.blood_group}  [{status}]"
             col_a, col_b, col_c = st.columns([1, 1, 4])
             col_a.markdown(f"**{label}**")
             col_b.markdown(f"{item.available_units} u")
-            col_c.progress(pct)
+            col_c.progress(item.available_units / max_units)
 
     st.markdown("---")
-
-    # Row 3 – recent donations
     st.subheader("Recent Donations")
     recent = history_svc.recent_donations(5)
     if recent:
@@ -214,7 +246,7 @@ def _page_overview():
              for r in recent],
             use_container_width=True,
             column_config={
-                "Units": st.column_config.NumberColumn("Units", format="%d 🩸"),
+                "Units": st.column_config.NumberColumn("Units", format="%d units"),
                 "Date":  st.column_config.DateColumn("Date", format="DD MMM YYYY"),
             },
         )
@@ -225,16 +257,16 @@ def _page_overview():
 # ── Page: Donor Registration ──────────────────────────────────────────────────
 
 def _page_donor_registration():
-    st.title("➕ Register Donor")
+    st.title("Register Donor")
 
     with st.form("register_donor"):
         col1, col2 = st.columns(2)
-        name         = col1.text_input("Full Name")
-        age          = col2.number_input("Age", min_value=18, max_value=65, value=25, step=1)
-        blood_group  = col1.selectbox("Blood Group", BLOOD_GROUPS)
-        city         = col2.text_input("City")
+        name          = col1.text_input("Full Name")
+        age           = col2.number_input("Age", min_value=18, max_value=65, value=25, step=1)
+        blood_group   = col1.selectbox("Blood Group", BLOOD_GROUPS)
+        city          = col2.text_input("City")
         last_donation = col1.date_input("Last Donation Date (leave blank if first-time)", value=None)
-        submitted    = st.form_submit_button("🩸 Register Donor")
+        submitted     = st.form_submit_button("Register Donor")
 
     if submitted:
         if not name.strip() or not city.strip():
@@ -242,30 +274,25 @@ def _page_donor_registration():
         else:
             last_str = last_donation.isoformat() if last_donation else None
             donor = donor_svc.register(name.strip(), int(age), blood_group, city.strip(), last_str)
-            st.success(f"✅ Registered **{donor.name}** successfully!  \nDonor ID: `{donor.donor_id}`")
+            st.success(f"Registered {donor.name} successfully. Donor ID: {donor.donor_id}")
 
     st.divider()
     st.subheader("All Registered Donors")
     donors = donor_svc.all_donors()
     if donors:
-        rows = []
-        for d in donors:
-            rows.append({
-                "ID":           d.donor_id,
-                "Name":         d.name,
-                "Age":          d.age,
-                "Blood Group":  d.blood_group,
-                "City":         d.city.title(),
-                "Last Donation": d.last_donation_date or "—",
-                "Eligible":     _eligibility_badge(d.is_eligible()),
-            })
+        rows = [{
+            "ID":            d.donor_id,
+            "Name":          d.name,
+            "Age":           d.age,
+            "Blood Group":   d.blood_group,
+            "City":          d.city.title(),
+            "Last Donation": d.last_donation_date or "—",
+            "Eligible":      _eligibility_badge(d.is_eligible()),
+        } for d in donors]
         st.dataframe(
             rows,
             use_container_width=True,
-            column_config={
-                "Age":  st.column_config.NumberColumn("Age", format="%d yrs"),
-                "Eligible": st.column_config.TextColumn("Eligible"),
-            },
+            column_config={"Age": st.column_config.NumberColumn("Age", format="%d yrs")},
         )
         st.caption(f"{len(donors)} donor(s) registered")
     else:
@@ -275,7 +302,7 @@ def _page_donor_registration():
 # ── Page: Donor Search ────────────────────────────────────────────────────────
 
 def _page_donor_search():
-    st.title("🔍 Donor Search")
+    st.title("Donor Search")
 
     search_mode = st.radio("Search by", ["Blood Group", "City", "Eligible Donors"], horizontal=True)
 
@@ -293,33 +320,24 @@ def _page_donor_search():
         bg_filter = col1.selectbox("Blood Group (optional)", ["All"] + BLOOD_GROUPS)
         blood_group_arg = None if bg_filter == "All" else bg_filter
         results = donor_svc.search_eligible_donors(blood_group_arg)
-        col2.markdown(
-            f"<br><span style='color:#555;font-size:13px;'>Donors who last donated "
-            f"≥ 90 days ago, sorted oldest-donation first</span>",
-            unsafe_allow_html=True,
-        )
+        col2.caption("Donors who last donated 90+ days ago, sorted oldest-donation first.")
 
     if results:
-        rows = []
-        for d in results:
-            rows.append({
-                "ID":            d.donor_id,
-                "Name":          d.name,
-                "Age":           d.age,
-                "Blood Group":   d.blood_group,
-                "City":          d.city.title(),
-                "Last Donation": d.last_donation_date or "Never",
-                "Status":        _eligibility_badge(d.is_eligible()),
-            })
+        rows = [{
+            "ID":            d.donor_id,
+            "Name":          d.name,
+            "Age":           d.age,
+            "Blood Group":   d.blood_group,
+            "City":          d.city.title(),
+            "Last Donation": d.last_donation_date or "Never",
+            "Status":        _eligibility_badge(d.is_eligible()),
+        } for d in results]
         st.dataframe(
             rows,
             use_container_width=True,
-            column_config={
-                "Age":    st.column_config.NumberColumn("Age", format="%d yrs"),
-                "Status": st.column_config.TextColumn("Status"),
-            },
+            column_config={"Age": st.column_config.NumberColumn("Age", format="%d yrs")},
         )
-        st.caption(f"**{len(results)}** donor(s) found.")
+        st.caption(f"{len(results)} donor(s) found.")
     else:
         st.info("No donors found for the given criteria.")
 
@@ -327,9 +345,9 @@ def _page_donor_search():
 # ── Page: Blood Inventory ─────────────────────────────────────────────────────
 
 def _page_inventory():
-    st.title("🩸 Blood Inventory")
+    st.title("Blood Inventory")
 
-    col_form, col_status = st.columns([1, 1])
+    col_form, col_status = st.columns(2)
 
     with col_form:
         st.subheader("Add / Update Units")
@@ -338,11 +356,11 @@ def _page_inventory():
             units  = st.number_input("Units to Add", min_value=1, value=10, step=1)
             expiry = st.date_input("Expiry Date",
                                    value=date.today().replace(year=date.today().year + 1))
-            add_submitted = st.form_submit_button("➕ Add Units")
+            add_submitted = st.form_submit_button("Add Units")
 
         if add_submitted:
             item = inventory_svc.add_units(bg, int(units), expiry.isoformat())
-            st.success(f"**{bg}** → **{item.available_units}** units  \nExpires: {item.expiry_date}")
+            st.success(f"{bg}: {item.available_units} units available. Expires {item.expiry_date}.")
 
     with col_status:
         st.subheader("Stock Level Overview")
@@ -352,15 +370,9 @@ def _page_inventory():
             for item in sorted(all_items, key=lambda x: x.available_units, reverse=True):
                 expired = item.is_expired()
                 low     = item.available_units < 10
-                icon    = "🔴" if expired else ("🟠" if low else "🟢")
-                pct     = item.available_units / max(max_u, 1)
-                label   = f"{icon} **{item.blood_group}** — {item.available_units} units"
-                if expired:
-                    label += " *(EXPIRED)*"
-                elif low:
-                    label += " *(LOW)*"
-                st.markdown(label)
-                st.progress(pct)
+                tag     = " [EXPIRED]" if expired else (" [LOW]" if low else "")
+                st.markdown(f"**{item.blood_group}**{tag} — {item.available_units} units")
+                st.progress(item.available_units / max(max_u, 1))
         else:
             st.info("No inventory yet.")
 
@@ -372,12 +384,12 @@ def _page_inventory():
         for item in sorted(all_items, key=lambda x: x.blood_group):
             expired = item.is_expired()
             low     = item.available_units < 10
-            status  = "🔴 Expired" if expired else ("🟠 Low Stock" if low else "🟢 OK")
+            status  = "Expired" if expired else ("Low Stock" if low else "OK")
             rows.append({
-                "Blood Group":    item.blood_group,
+                "Blood Group":     item.blood_group,
                 "Available Units": item.available_units,
-                "Expiry Date":    item.expiry_date,
-                "Status":         status,
+                "Expiry Date":     item.expiry_date,
+                "Status":          status,
             })
         st.dataframe(
             rows,
@@ -397,79 +409,71 @@ def _page_inventory():
 # ── Page: Emergency Requests ──────────────────────────────────────────────────
 
 def _page_emergency():
-    st.title("🚨 Emergency Blood Requests")
+    st.title("Emergency Blood Requests")
 
-    col_form, col_queue = st.columns([1, 1])
+    col_form, col_queue = st.columns(2)
 
     with col_form:
         st.subheader("Submit Request")
         with st.form("emergency_form"):
-            bg       = st.selectbox("Blood Group Needed", BLOOD_GROUPS, key="emg_bg")
-            units    = st.number_input("Units Needed", min_value=1, value=2, step=1)
-            hospital = st.text_input("Hospital Name")
-            contact  = st.text_input("Contact Number")
-            priority_label = st.selectbox(
-                "Priority",
-                ["🔴 1 - Critical", "🟠 2 - Urgent", "🟢 3 - Normal"],
-            )
-            submit_req = st.form_submit_button("🚨 Submit Emergency Request")
+            bg             = st.selectbox("Blood Group Needed", BLOOD_GROUPS, key="emg_bg")
+            units          = st.number_input("Units Needed", min_value=1, value=2, step=1)
+            hospital       = st.text_input("Hospital Name")
+            contact        = st.text_input("Contact Number")
+            priority_label = st.selectbox("Priority", ["1 - Critical", "2 - Urgent", "3 - Normal"])
+            submit_req     = st.form_submit_button("Submit Emergency Request")
 
         if submit_req:
             if not hospital.strip() or not contact.strip():
                 st.error("Hospital and contact are required.")
             else:
-                priority_num = int(priority_label.split(" - ")[0].split()[-1])
+                priority_num = int(priority_label.split(" - ")[0])
                 req = emergency_svc.submit_request(
                     bg, int(units), hospital.strip(), contact.strip(), priority_num
                 )
-                st.success(
-                    f"Request queued! ID: `{req.request_id}`  \n"
-                    f"Queue size: **{emergency_svc.queue_size()}**"
-                )
+                st.success(f"Request queued. ID: {req.request_id}  |  Queue size: {emergency_svc.queue_size()}")
 
     with col_queue:
         st.subheader(f"Queue ({emergency_svc.queue_size()} pending)")
-        if st.button("⚡ Process Next Request", use_container_width=True):
+        if st.button("Process Next Request", use_container_width=True):
             if emergency_svc.queue_size() == 0:
                 st.warning("No pending requests.")
             else:
                 req, fulfilled = emergency_svc.process_next()
                 if fulfilled:
                     st.success(
-                        f"✅ **Fulfilled**  \n"
-                        f"{req.hospital} received **{req.units_needed} units** of **{req.blood_group}**"
+                        f"Fulfilled: {req.hospital} received {req.units_needed} units of {req.blood_group}."
                     )
                 else:
                     st.error(
-                        f"❌ **Insufficient Stock**  \n"
-                        f"{req.hospital} requested {req.units_needed} units of {req.blood_group}"
+                        f"Insufficient stock. {req.hospital} requested {req.units_needed} units of {req.blood_group}."
                     )
 
         pending = emergency_svc.pending_requests()
         if pending:
-            rows = [
-                {
-                    "Priority":     _priority_label(r.priority),
-                    "Blood Group":  r.blood_group,
-                    "Units":        r.units_needed,
-                    "Hospital":     r.hospital,
-                    "Contact":      r.contact,
-                    "ID":           r.request_id,
-                }
-                for r in pending
-            ]
-            st.dataframe(rows, use_container_width=True,
-                         column_config={"Units": st.column_config.NumberColumn("Units", format="%d 🩸")})
+            rows = [{
+                "Priority":    _priority_label(r.priority),
+                "Blood Group": r.blood_group,
+                "Units":       r.units_needed,
+                "Hospital":    r.hospital,
+                "Contact":     r.contact,
+                "ID":          r.request_id,
+            } for r in pending]
+            st.dataframe(
+                rows,
+                use_container_width=True,
+                column_config={"Units": st.column_config.NumberColumn("Units", format="%d units")},
+            )
         else:
-            st.info("Queue is empty — no pending requests.")
+            st.info("Queue is empty.")
 
 
 # ── Page: Donation History ────────────────────────────────────────────────────
 
 def _page_history():
-    st.title("📋 Donation History")
+    st.title("Donation History")
 
-    col_form, col_search = st.columns([1, 1])
+    col_form, col_search = st.columns(2)
 
     with col_form:
         st.subheader("Record a Donation")
@@ -478,18 +482,18 @@ def _page_history():
             units         = st.number_input("Units Donated", min_value=1, value=1, step=1)
             recipient     = st.text_input("Recipient Details (name / ward)")
             donation_date = st.date_input("Donation Date", value=date.today())
-            record_submitted = st.form_submit_button("📝 Record Donation")
+            record_submitted = st.form_submit_button("Record Donation")
 
         if record_submitted:
             donor = donor_svc.get_donor(donor_id.strip())
             if not donor:
-                st.error(f"Donor ID `{donor_id}` not found.")
+                st.error(f"Donor ID '{donor_id}' not found.")
             else:
                 history_svc.record_donation(
                     donor.donor_id, donation_date.isoformat(), int(units), recipient
                 )
                 donor_svc.update_last_donation_date(donor.donor_id, donation_date.isoformat())
-                st.success(f"✅ Donation by **{donor.name}** recorded.")
+                st.success(f"Donation by {donor.name} recorded.")
 
     with col_search:
         st.subheader("Donor History Lookup")
@@ -498,12 +502,11 @@ def _page_history():
             donor_records = history_svc.donor_history(search_id.strip())
             if donor_records:
                 st.dataframe(
-                    [{"Date": r.donation_date, "Units": r.units_donated,
-                      "Recipient": r.recipient_details}
+                    [{"Date": r.donation_date, "Units": r.units_donated, "Recipient": r.recipient_details}
                      for r in donor_records],
                     use_container_width=True,
                     column_config={
-                        "Units": st.column_config.NumberColumn("Units", format="%d 🩸"),
+                        "Units": st.column_config.NumberColumn("Units", format="%d units"),
                         "Date":  st.column_config.DateColumn("Date", format="DD MMM YYYY"),
                     },
                 )
@@ -522,7 +525,7 @@ def _page_history():
              for r in records],
             use_container_width=True,
             column_config={
-                "Units": st.column_config.NumberColumn("Units", format="%d 🩸"),
+                "Units": st.column_config.NumberColumn("Units", format="%d units"),
                 "Date":  st.column_config.DateColumn("Date", format="DD MMM YYYY"),
             },
         )
@@ -533,10 +536,10 @@ def _page_history():
 # ── Page: Analytics ───────────────────────────────────────────────────────────
 
 def _page_analytics():
-    st.title("📊 Analytics Dashboard")
+    st.title("Analytics Dashboard")
 
     tab1, tab2, tab3 = st.tabs(
-        ["🧑‍🤝‍🧑 Blood Group Distribution", "🩸 Inventory Status", "📅 Monthly Donations"]
+        ["Blood Group Distribution", "Inventory Status", "Monthly Donations"]
     )
 
     with tab1:
@@ -577,7 +580,7 @@ def _page_analytics():
                     [{"Group": i.blood_group,
                       "Units": i.available_units,
                       "Expires": i.expiry_date,
-                      "Status": "🔴 Expired" if i.is_expired() else "🟢 OK"}
+                      "Status": "Expired" if i.is_expired() else "OK"}
                      for i in sorted(inventory, key=lambda x: x.available_units, reverse=True)],
                     use_container_width=True,
                     column_config={
@@ -605,17 +608,17 @@ def _page_analytics():
 
 # ── Router ────────────────────────────────────────────────────────────────────
 
-if page == "🏠 Overview":
+if page == "Overview":
     _page_overview()
-elif page == "➕ Register Donor":
+elif page == "Register Donor":
     _page_donor_registration()
-elif page == "🔍 Donor Search":
+elif page == "Donor Search":
     _page_donor_search()
-elif page == "🩸 Blood Inventory":
+elif page == "Blood Inventory":
     _page_inventory()
-elif page == "🚨 Emergency Requests":
+elif page == "Emergency Requests":
     _page_emergency()
-elif page == "📋 Donation History":
+elif page == "Donation History":
     _page_history()
-elif page == "📊 Analytics":
+elif page == "Analytics":
     _page_analytics()
