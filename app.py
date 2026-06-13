@@ -23,50 +23,78 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+/* ── Palette: #D92243 | #F69D39 | #E0C375 | #FFF5E5 ── */
+
+/* ── Global background ── */
+.stApp { background-color: #FFF5E5; }
+[data-testid="stAppViewContainer"] { background-color: #FFF5E5; }
+[data-testid="stHeader"] { background-color: #FFF5E5; }
+
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #7b0000 0%, #b71c1c 60%, #d32f2f 100%);
+    background: linear-gradient(180deg, #D92243 0%, #c41e3a 55%, #b01830 100%);
 }
-[data-testid="stSidebar"] * { color: #fff !important; }
+[data-testid="stSidebar"] * { color: #FFF5E5 !important; }
 [data-testid="stSidebar"] .stRadio label { font-size: 15px; font-weight: 500; }
-[data-testid="stSidebar"] hr { border-color: rgba(255,255,255,0.3); }
+[data-testid="stSidebar"] hr { border-color: rgba(255,245,229,0.35); }
 
 /* ── Metric cards ── */
 [data-testid="stMetric"] {
     background: #fff;
-    border: 1px solid #e0e0e0;
-    border-left: 4px solid #c62828;
-    border-radius: 8px;
+    border: 1px solid #E0C375;
+    border-left: 5px solid #D92243;
+    border-radius: 10px;
     padding: 16px 20px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(217,34,67,0.10);
 }
-[data-testid="stMetricValue"] { color: #b71c1c; font-weight: 700; }
-[data-testid="stMetricLabel"] { color: #555; font-size: 13px; }
+[data-testid="stMetricValue"] { color: #D92243; font-weight: 700; }
+[data-testid="stMetricLabel"] { color: #7a5c2e; font-size: 13px; }
 
 /* ── Primary buttons ── */
 .stButton > button {
-    background: #c62828;
-    color: white;
+    background: #D92243;
+    color: #FFF5E5;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-weight: 600;
     padding: 8px 20px;
     transition: background 0.2s;
 }
-.stButton > button:hover { background: #8b0000; color: white; }
+.stButton > button:hover { background: #F69D39; color: #fff; }
 
 /* ── Form submit buttons ── */
 [data-testid="stFormSubmitButton"] > button {
-    background: #c62828;
-    color: white;
+    background: #D92243;
+    color: #FFF5E5;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-weight: 600;
 }
-[data-testid="stFormSubmitButton"] > button:hover { background: #8b0000; }
+[data-testid="stFormSubmitButton"] > button:hover { background: #F69D39; color: #fff; }
 
 /* ── Page title accent ── */
-h1 { border-bottom: 3px solid #c62828; padding-bottom: 8px; color: #1a1a1a; }
+h1 { border-bottom: 3px solid #F69D39; padding-bottom: 8px; color: #1a1a1a; }
+h2 { color: #D92243; }
+h3 { color: #7a5c2e; }
+
+/* ── Tabs ── */
+[data-testid="stTab"] { color: #D92243; font-weight: 600; }
+.stTabs [data-baseweb="tab-highlight"] { background-color: #D92243; }
+.stTabs [data-baseweb="tab-border"]    { background-color: #E0C375; }
+
+/* ── Divider ── */
+hr { border-color: #E0C375; }
+
+/* ── Input fields ── */
+[data-testid="stTextInput"] input,
+[data-testid="stNumberInput"] input,
+[data-baseweb="select"] {
+    background: #fff;
+    border-color: #E0C375;
+}
+
+/* ── Dataframe ── */
+[data-testid="stDataFrame"] { border: 1px solid #E0C375; border-radius: 8px; }
 
 /* ── Stat badge pill ── */
 .badge {
@@ -77,18 +105,22 @@ h1 { border-bottom: 3px solid #c62828; padding-bottom: 8px; color: #1a1a1a; }
     font-weight: 600;
 }
 .badge-green  { background: #e8f5e9; color: #2e7d32; }
-.badge-red    { background: #ffebee; color: #c62828; }
-.badge-orange { background: #fff3e0; color: #e65100; }
+.badge-red    { background: #ffebee; color: #D92243; }
+.badge-orange { background: #fff3e0; color: #F69D39; }
 .badge-blue   { background: #e3f2fd; color: #1565c0; }
 
 /* ── Card container ── */
 .info-card {
-    background: #fff8f8;
-    border: 1px solid #ffcdd2;
+    background: #fffaf0;
+    border: 1px solid #E0C375;
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 12px;
 }
+
+/* ── Progress bar color ── */
+[data-testid="stProgressBar"] > div > div { background-color: #D92243; }
+[data-testid="stProgressBar"] > div { background-color: #E0C375; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -142,7 +174,7 @@ st.sidebar.markdown(f"""
 - 🚨 Queue: **{queue_cnt}**
 """)
 st.sidebar.markdown("---")
-st.sidebar.caption("SIC Hackathon · 2026")
+st.sidebar.markdown("<span style='color:#E0C375;font-size:12px;'>SIC Hackathon · 2026</span>", unsafe_allow_html=True)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
