@@ -40,15 +40,15 @@ st.markdown("""
 
 /* ── Metric cards ── */
 [data-testid="stMetric"] {
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-left: 4px solid #c62828;
+    background: linear-gradient(135deg, #263238 0%, #37474f 100%);
+    border: 1px solid #455a64;
+    border-left: 4px solid #ef5350;
     border-radius: 8px;
     padding: 16px 20px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
 }
-[data-testid="stMetricValue"] { color: #b71c1c; font-weight: 700; }
-[data-testid="stMetricLabel"] { color: #555; font-size: 13px; }
+[data-testid="stMetricValue"] { color: #ef9a9a; font-weight: 700; }
+[data-testid="stMetricLabel"] { color: #b0bec5; font-size: 13px; }
 
 /* ── Primary buttons ── */
 .stButton > button {
