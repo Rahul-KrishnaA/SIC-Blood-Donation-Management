@@ -68,3 +68,47 @@ def test_update_last_donation_date(svc):
     svc.update_last_donation_date(donor.donor_id, "2026-06-13")
     updated = svc.get_donor(donor.donor_id)
     assert updated.last_donation_date == "2026-06-13"
+
+
+import file_io.json_handler as json_handler
+from services.inventory_service import InventoryService
+
+
+@pytest.fixture
+def inv_svc(tmp_path, monkeypatch):
+    monkeypatch.setattr(json_handler, "INVENTORY_FILE", str(tmp_path / "inventory.json"))
+    return InventoryService()
+
+
+def test_add_units_creates_new_entry(inv_svc):
+    item = inv_svc.add_units("A+", 10, "2099-01-01")
+    assert item.available_units == 10
+
+
+def test_add_units_accumulates_on_existing(inv_svc):
+    inv_svc.add_units("B+", 5, "2099-01-01")
+    inv_svc.add_units("B+", 3, "2099-06-01")
+    assert inv_svc.get_inventory("B+")[0].available_units == 8
+
+
+def test_use_units_reduces_stock(inv_svc):
+    inv_svc.add_units("O+", 10, "2099-01-01")
+    result = inv_svc.use_units("O+", 4)
+    assert result is True
+    assert inv_svc.get_inventory("O+")[0].available_units == 6
+
+
+def test_use_units_returns_false_when_insufficient(inv_svc):
+    inv_svc.add_units("AB-", 2, "2099-01-01")
+    result = inv_svc.use_units("AB-", 5)
+    assert result is False
+    assert inv_svc.get_inventory("AB-")[0].available_units == 2
+
+
+def test_get_valid_inventory_excludes_expired(inv_svc):
+    inv_svc.add_units("A+", 5, "2020-01-01")
+    inv_svc.add_units("B+", 5, "2099-01-01")
+    valid = inv_svc.get_valid_inventory()
+    groups = {i.blood_group for i in valid}
+    assert "A+" not in groups
+    assert "B+" in groups
