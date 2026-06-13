@@ -220,8 +220,4 @@ Donors are eligible to donate if their last donation was **90+ days ago** (or if
 - [Lucide React](https://lucide.dev/)
 - [Streamlit](https://streamlit.io/) (legacy UI)
 
----
 
-## Repository
-
-**https://github.com/Rahul-KrishnaA/SIC-Blood-Donation-Management**
